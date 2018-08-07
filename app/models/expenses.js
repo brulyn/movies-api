@@ -7,7 +7,6 @@ const ExpenseSchema = new mongoose.Schema({
     total: mongoose.SchemaTypes.Decimal128,
     expense_date: mongoose.SchemaTypes.Date,
     employee_id: mongoose.SchemaTypes.ObjectId,
-    shop_id: mongoose.SchemaTypes.ObjectId,
     store_id: mongoose.SchemaTypes.ObjectId,
     supplier_id: mongoose.SchemaTypes.ObjectId,
     cost: mongoose.SchemaTypes.Decimal128,

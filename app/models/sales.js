@@ -16,7 +16,6 @@ const SaleSchema = new mongoose.Schema({
     profit: mongoose.SchemaTypes.Decimal128,
     employee_id: mongoose.SchemaTypes.ObjectId,
     month_year: String,
-    shop_id: mongoose.SchemaTypes.ObjectId,
     store_id: mongoose.SchemaTypes.ObjectId
 });
 

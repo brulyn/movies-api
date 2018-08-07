@@ -16,6 +16,9 @@ const Subcategory = require('./app/models/subcategories.js');
 const Product = require('./app/models/products.js');
 const Sale = require('./app/models/sales.js');
 const Expense = require('./app/models/expenses.js');
+const Supplier = require('./app/models/suppliers.js');
+const Customer = require('./app/models/customers.js');
+const User = require('./app/models/users.js');
 
 app.use(bodyParser.urlencoded({ useNewUrlParser: true }));
 app.use(bodyParser.json());
@@ -449,22 +452,16 @@ app.get('/simplex_api/expenses/:id', (req, res) => {
 //insert
 app.post('/simplex_api/expenses', (req, res) => {
     Expense.create({
-        recipient: req.query.recipient,
         product_id: req.query.product_id,
         quantity: req.query.quantity,
         total: req.query.total,
-        sale_date: new Date(),
-        payment_type: req.query.payment_type,
-        vat: req.query.vat,
-        no_vat: req.query.no_vat,
-        nettotal: req.query.nettotal,
-        paid: req.query.paid,
-        due: req.query.due,
-        profit: req.query.profit,
+        expense_date: new Date(),
         employee_id: req.query.employee_id,
-        month_year: req.query.month_year,
         shop_id: req.query.shop_id,
-        store_id: req.query.store_id
+        store_id: req.query.store_id,
+        supplier_id: req.query.supplier_id,
+        cost: req.query.cost,
+        month_year: req.query.month_year
     }, (err, expense) => {
         if (err)
             console.log(handleError(err));
@@ -503,3 +500,196 @@ app.delete('/simplex_api/expenses/:id', (req, res) => {
         });
     });
 });
+
+
+//SUPPLIERS
+//get all
+app.get('/simplex_api/suppliers', (req, res) => {
+    Supplier.find((err, suppliers) => {
+        if (err)
+            console.log(handleError(err));
+        res.json(suppliers);
+    });
+});
+//get One
+app.get('/simplex_api/suppliers/:id', (req, res) => {
+    Supplier.findById(req.params.id, (err, suppliers) => {
+        if (err)
+            console.log(handleError(err));
+        res.json(suppliers);
+    });
+});
+//insert
+app.post('/simplex_api/suppliers', (req, res) => {
+    Supplier.create({
+        names: req.query.names,
+        address: req.query.address,
+        email: req.query.email,
+        telephone: req.query.telephone
+    }, (err, supplier) => {
+        if (err)
+            console.log(handleError(err));
+        Supplier.find((err, suppliers) => {
+            if (err)
+                console.log(handleError(err));
+            res.json(suppliers);
+        });
+    });
+});
+//update
+app.put('/simplex_api/suppliers/:id', (req, res) => {
+    Supplier.findById(req.params.id, (err, supplier) => {
+        supplier.update(req.query, (err, suppliers) => {
+            if (err)
+                console.log(handleError(err));
+            Supplier.find((err, suppliers) => {
+                if (err)
+                    console.log(handleError(err));
+                res.json(suppliers);
+            });
+        });
+    });
+});
+//delete
+app.delete('/simplex_api/suppliers/:id', (req, res) => {
+    Supplier.remove({
+        _id: req.params.id
+    }, (err, suppliers) => {
+        if (err)
+            console.log(handleError(err));
+        Supplier.find((err, suppliers) => {
+            if (err)
+                console.log(handleError(err));
+            res.json(suppliers);
+        });
+    });
+});
+
+
+//CUSTOMERS
+//get all
+app.get('/simplex_api/customers', (req, res) => {
+    Customer.find((err, customers) => {
+        if (err)
+            console.log(handleError(err));
+        res.json(customers);
+    });
+});
+//get One
+app.get('/simplex_api/customers/:id', (req, res) => {
+    Customer.findById(req.params.id, (err, customers) => {
+        if (err)
+            console.log(handleError(err));
+        res.json(customers);
+    });
+});
+//insert
+app.post('/simplex_api/customers', (req, res) => {
+    Customer.create({
+        names: req.query.names,
+        address: req.query.address,
+        email: req.query.email,
+        telephone: req.query.telephone
+    }, (err, customer) => {
+        if (err)
+            console.log(handleError(err));
+        Customer.find((err, customers) => {
+            if (err)
+                console.log(handleError(err));
+            res.json(customers);
+        });
+    });
+});
+//update
+app.put('/simplex_api/customers/:id', (req, res) => {
+    Customer.findById(req.params.id, (err, customer) => {
+        customer.update(req.query, (err, customers) => {
+            if (err)
+                console.log(handleError(err));
+            Customer.find((err, customers) => {
+                if (err)
+                    console.log(handleError(err));
+                res.json(customers);
+            });
+        });
+    });
+});
+//delete
+app.delete('/simplex_api/customers/:id', (req, res) => {
+    Customer.remove({
+        _id: req.params.id
+    }, (err, customers) => {
+        if (err)
+            console.log(handleError(err));
+        Customer.find((err, customers) => {
+            if (err)
+                console.log(handleError(err));
+            res.json(customers);
+        });
+    });
+});
+
+//USERS
+//get all
+app.get('/simplex_api/users', (req, res) => {
+    User.find((err, users) => {
+        if (err)
+            console.log(handleError(err));
+        res.json(users);
+    });
+});
+//get One
+app.get('/simplex_api/users/:id', (req, res) => {
+    User.findById(req.params.id, (err, users) => {
+        if (err)
+            console.log(handleError(err));
+        res.json(users);
+    });
+});
+//insert
+app.post('/simplex_api/users', (req, res) => {
+    User.create({
+        names: req.query.names,
+        username: req.query.username,
+        email: req.query.email,
+        password: sha1(req.query.password),
+        store_id: req.query.store_id
+    }, (err, user) => {
+        if (err)
+            console.log(handleError(err));
+        User.find((err, users) => {
+            if (err)
+                console.log(handleError(err));
+            res.json(users);
+        });
+    });
+});
+//update
+app.put('/simplex_api/users/:id', (req, res) => {
+    User.findById(req.params.id, (err, user) => {
+        user.update(req.query, (err, users) => {
+            if (err)
+                console.log(handleError(err));
+            User.find((err, users) => {
+                if (err)
+                    console.log(handleError(err));
+                res.json(users);
+            });
+        });
+    });
+});
+//delete
+app.delete('/simplex_api/users/:id', (req, res) => {
+    User.remove({
+        _id: req.params.id
+    }, (err, users) => {
+        if (err)
+            console.log(handleError(err));
+        User.find((err, users) => {
+            if (err)
+                console.log(handleError(err));
+            res.json(users);
+        });
+    });
+});
+
