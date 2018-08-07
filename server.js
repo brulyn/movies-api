@@ -14,6 +14,8 @@ const Store = require('./app/models/stores.js');
 const Category = require('./app/models/categories.js');
 const Subcategory = require('./app/models/subcategories.js');
 const Product = require('./app/models/products.js');
+const Sale = require('./app/models/sales.js');
+const Expense = require('./app/models/expenses.js');
 
 app.use(bodyParser.urlencoded({ useNewUrlParser: true }));
 app.use(bodyParser.json());
@@ -345,6 +347,159 @@ app.delete('/simplex_api/products/:id', (req, res) => {
             if (err)
                 console.log(handleError(err));
             res.json(products);
+        });
+    });
+});
+
+
+//SALES
+//get all
+app.get('/simplex_api/sales', (req, res) => {
+    Sale.find((err, sales) => {
+        if (err)
+            console.log(handleError(err));
+        res.json(sales);
+    });
+});
+//get One
+app.get('/simplex_api/sales/:id', (req, res) => {
+    Sale.findById(req.params.id, (err, sales) => {
+        if (err)
+            console.log(handleError(err));
+        res.json(sales);
+    });
+});
+//insert
+app.post('/simplex_api/sales', (req, res) => {
+    Sale.create({
+        recipient: req.query.recipient,
+        product_id: req.query.product_id,
+        quantity: req.query.quantity,
+        total: req.query.total,
+        sale_date: new Date(),
+        payment_type: req.query.payment_type,
+        vat: req.query.vat,
+        no_vat: req.query.no_vat,
+        nettotal: req.query.nettotal,
+        paid: req.query.paid,
+        due: req.query.due,
+        profit: req.query.profit,
+        employee_id: req.query.employee_id,
+        month_year: req.query.month_year,
+        shop_id: req.query.shop_id,
+        store_id: req.query.store_id
+    }, (err, sale) => {
+        if (err)
+            console.log(handleError(err));
+        Sale.find((err, sales) => {
+            if (err)
+                console.log(handleError(err));
+            res.json(sales);
+        });
+    });
+});
+//update
+app.put('/simplex_api/sales/:id', (req, res) => {
+    Sale.findById(req.params.id, (err, sale) => {
+        sale.update(req.query, (err, sales) => {
+            if (err)
+                console.log(handleError(err));
+            Sale.find((err, sales) => {
+                if (err)
+                    console.log(handleError(err));
+                res.json(sales);
+            });
+        });
+    });
+});
+//delete
+app.delete('/simplex_api/sales/:id', (req, res) => {
+    Sale.remove({
+        _id: req.params.id
+    }, (err, sales) => {
+        if (err)
+            console.log(handleError(err));
+        Sale.find((err, sales) => {
+            if (err)
+                console.log(handleError(err));
+            res.json(sales);
+        });
+    });
+});
+
+
+
+//EXPENSES
+//get all
+app.get('/simplex_api/expenses', (req, res) => {
+    Expense.find((err, expenses) => {
+        if (err)
+            console.log(handleError(err));
+        res.json(expenses);
+    });
+});
+//get One
+app.get('/simplex_api/expenses/:id', (req, res) => {
+    Expense.findById(req.params.id, (err, expenses) => {
+        if (err)
+            console.log(handleError(err));
+        res.json(expenses);
+    });
+});
+//insert
+app.post('/simplex_api/expenses', (req, res) => {
+    Expense.create({
+        recipient: req.query.recipient,
+        product_id: req.query.product_id,
+        quantity: req.query.quantity,
+        total: req.query.total,
+        sale_date: new Date(),
+        payment_type: req.query.payment_type,
+        vat: req.query.vat,
+        no_vat: req.query.no_vat,
+        nettotal: req.query.nettotal,
+        paid: req.query.paid,
+        due: req.query.due,
+        profit: req.query.profit,
+        employee_id: req.query.employee_id,
+        month_year: req.query.month_year,
+        shop_id: req.query.shop_id,
+        store_id: req.query.store_id
+    }, (err, expense) => {
+        if (err)
+            console.log(handleError(err));
+        Expense.find((err, expenses) => {
+            if (err)
+                console.log(handleError(err));
+            res.json(expenses);
+        });
+    });
+});
+//update
+app.put('/simplex_api/expenses/:id', (req, res) => {
+    Expense.findById(req.params.id, (err, expense) => {
+        expense.update(req.query, (err, expenses) => {
+            if (err)
+                console.log(handleError(err));
+            Expense.find((err, expenses) => {
+                if (err)
+                    console.log(handleError(err));
+                res.json(expenses);
+            });
+        });
+    });
+});
+//delete
+app.delete('/simplex_api/expenses/:id', (req, res) => {
+    Expense.remove({
+        _id: req.params.id
+    }, (err, expenses) => {
+        if (err)
+            console.log(handleError(err));
+        Expense.find((err, expenses) => {
+            if (err)
+                console.log(handleError(err));
+            res.json(expenses);
         });
     });
 });
