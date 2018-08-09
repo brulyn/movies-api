@@ -40,7 +40,7 @@ app.listen(3000, () => {
 
 //SHOPS
 //get all
-app.get('/simplex_api/shops', (req, res) => {
+app.get('/api/shops', (req, res) => {
     Shop.find((err, shops) => {
         if (err)
             console.log(err);
@@ -48,7 +48,7 @@ app.get('/simplex_api/shops', (req, res) => {
     });
 });
 //get One
-app.get('/simplex_api/shops/:id', (req, res) => {
+app.get('/api/shops/:id', (req, res) => {
     Shop.findById(req.params.id, (err, shop) => {
         if (err)
             console.log(err);
@@ -56,7 +56,7 @@ app.get('/simplex_api/shops/:id', (req, res) => {
     });
 });
 //insert
-app.post('/simplex_api/shops', (req, res) => {
+app.post('/api/shops', (req, res) => {
     Shop.create({
         name: req.body.name,
         address: req.body.address,
@@ -88,7 +88,7 @@ app.post('/simplex_api/shops', (req, res) => {
     });
 });
 //update
-app.put('/simplex_api/shops/:id', (req, res) => {
+app.put('/api/shops/:id', (req, res) => {
     Shop.findById(req.params.id, (err, shop) => {
         shop.update(req.query, (err, shops) => {
             if (err)
@@ -102,7 +102,7 @@ app.put('/simplex_api/shops/:id', (req, res) => {
     });
 });
 //delete
-app.delete('/simplex_api/shops/:id', (req, res) => {
+app.delete('/api/shops/:id', (req, res) => {
     Shop.remove({
         _id: req.params.id
     }, (err, shops) => {
@@ -118,7 +118,7 @@ app.delete('/simplex_api/shops/:id', (req, res) => {
 
 //STORES
 //get all
-app.get('/simplex_api/stores', (req, res) => {
+app.get('/api/stores', (req, res) => {
     Store.aggregate()
         .lookup({
             from: 'shops',
@@ -130,7 +130,7 @@ app.get('/simplex_api/stores', (req, res) => {
         })
 });
 //get One
-app.get('/simplex_api/stores/:id', (req, res) => {
+app.get('/api/stores/:id', (req, res) => {
     Store.aggregate()
         .match({ _id: mongoose.Types.ObjectId(req.params.id) })
         .lookup({
@@ -144,7 +144,7 @@ app.get('/simplex_api/stores/:id', (req, res) => {
         })
 });
 //insert
-app.post('/simplex_api/stores', (req, res) => {
+app.post('/api/stores', (req, res) => {
     Store.create({
         name: req.body.name,
         address: req.body.address,
@@ -167,7 +167,7 @@ app.post('/simplex_api/stores', (req, res) => {
     });
 });
 //update
-app.put('/simplex_api/stores/:id', (req, res) => {
+app.put('/api/stores/:id', (req, res) => {
     console.log(req)
     Store.findById(req.params.id, (err, store) => {
         store.update(req.query, (err, stores) => {
@@ -182,7 +182,7 @@ app.put('/simplex_api/stores/:id', (req, res) => {
     });
 });
 //delete
-app.delete('/simplex_api/stores/:id', (req, res) => {
+app.delete('/api/stores/:id', (req, res) => {
     Store.remove({
         _id: req.params.id
     }, (err, stores) => {
@@ -202,7 +202,7 @@ app.delete('/simplex_api/stores/:id', (req, res) => {
 
 //CATEGORIES
 //get all
-app.get('/simplex_api/categories', (req, res) => {
+app.get('/api/categories', (req, res) => {
     Category.aggregate()
         .lookup({
             from: 'shops',
@@ -214,7 +214,7 @@ app.get('/simplex_api/categories', (req, res) => {
         });
 });
 //get One
-app.get('/simplex_api/categories/:id', (req, res) => {
+app.get('/api/categories/:id', (req, res) => {
     Category.aggregate()
         .match({ _id: mongoose.Types.ObjectId(req.params.id) })
         .lookup({
@@ -228,7 +228,7 @@ app.get('/simplex_api/categories/:id', (req, res) => {
         });
 });
 //insert
-app.post('/simplex_api/categories', (req, res) => {
+app.post('/api/categories', (req, res) => {
     Category.create({
         name: req.body.name,
         shop_id: req.body.shop_id
@@ -243,7 +243,7 @@ app.post('/simplex_api/categories', (req, res) => {
     });
 });
 //update
-app.put('/simplex_api/categories/:id', (req, res) => {
+app.put('/api/categories/:id', (req, res) => {
     Category.findById(req.params.id, (err, category) => {
         category.update(req.query, (err, categories) => {
             if (err)
@@ -257,7 +257,7 @@ app.put('/simplex_api/categories/:id', (req, res) => {
     });
 });
 //delete
-app.delete('/simplex_api/categories/:id', (req, res) => {
+app.delete('/api/categories/:id', (req, res) => {
     Category.remove({
         _id: req.params.id
     }, (err, categories) => {
@@ -273,7 +273,7 @@ app.delete('/simplex_api/categories/:id', (req, res) => {
 
 //SUBCATEGORIES
 //get all
-app.get('/simplex_api/subcategories', (req, res) => {
+app.get('/api/subcategories', (req, res) => {
     Subcategory.aggregate()
         .lookup({
             from: 'categories',
@@ -286,7 +286,7 @@ app.get('/simplex_api/subcategories', (req, res) => {
         })
 });
 //get One
-app.get('/simplex_api/subcategories/:id', (req, res) => {
+app.get('/api/subcategories/:id', (req, res) => {
     Subcategory.aggregate()
         .match({ _id: mongoose.Types.ObjectId(req.params.id) })
         .lookup({
@@ -301,7 +301,7 @@ app.get('/simplex_api/subcategories/:id', (req, res) => {
         })
 });
 //insert
-app.post('/simplex_api/subcategories', (req, res) => {
+app.post('/api/subcategories', (req, res) => {
     Subcategory.create({
         name: req.body.name,
         shop_id: req.body.shop_id
@@ -316,7 +316,7 @@ app.post('/simplex_api/subcategories', (req, res) => {
     });
 });
 //update
-app.put('/simplex_api/subcategories/:id', (req, res) => {
+app.put('/api/subcategories/:id', (req, res) => {
     Subcategory.findById(req.params.id, (err, subcategory) => {
         subcategory.update(req.query, (err, subcategories) => {
             if (err)
@@ -330,7 +330,7 @@ app.put('/simplex_api/subcategories/:id', (req, res) => {
     });
 });
 //delete
-app.delete('/simplex_api/subcategories/:id', (req, res) => {
+app.delete('/api/subcategories/:id', (req, res) => {
     Subcategory.remove({
         _id: req.params.id
     }, (err, subcategories) => {
@@ -347,7 +347,7 @@ app.delete('/simplex_api/subcategories/:id', (req, res) => {
 
 //PRODUCTS
 //get all
-app.get('/simplex_api/products', (req, res) => {
+app.get('/api/products', (req, res) => {
     Product.aggregate()
         .lookup({
             from: 'categories',
@@ -369,7 +369,7 @@ app.get('/simplex_api/products', (req, res) => {
         });
 });
 //get One
-app.get('/simplex_api/products/:id', (req, res) => {
+app.get('/api/products/:id', (req, res) => {
     Product.aggregate()
         .match({ _id: mongoose.Types.ObjectId(req.params.id) })
         .lookup({
@@ -392,7 +392,7 @@ app.get('/simplex_api/products/:id', (req, res) => {
         });
 });
 //insert
-app.post('/simplex_api/products', (req, res) => {
+app.post('/api/products', (req, res) => {
     Product.create({
         name: req.body.name,
         shop_id: req.body.shop_id
@@ -407,7 +407,7 @@ app.post('/simplex_api/products', (req, res) => {
     });
 });
 //update
-app.put('/simplex_api/products/:id', (req, res) => {
+app.put('/api/products/:id', (req, res) => {
     Product.findById(req.params.id, (err, product) => {
         product.update(req.query, (err, products) => {
             if (err)
@@ -421,7 +421,7 @@ app.put('/simplex_api/products/:id', (req, res) => {
     });
 });
 //delete
-app.delete('/simplex_api/products/:id', (req, res) => {
+app.delete('/api/products/:id', (req, res) => {
     Product.remove({
         _id: req.params.id
     }, (err, products) => {
@@ -438,7 +438,7 @@ app.delete('/simplex_api/products/:id', (req, res) => {
 
 //SALES
 //get all
-app.get('/simplex_api/sales', (req, res) => {
+app.get('/api/sales', (req, res) => {
     Sale.aggregate()
         .lookup({
             from: 'products',
@@ -457,7 +457,7 @@ app.get('/simplex_api/sales', (req, res) => {
         })
 });
 //get One
-app.get('/simplex_api/sales/:id', (req, res) => {
+app.get('/api/sales/:id', (req, res) => {
     Sale.aggregate()
         .match({ _id: mongoose.Types.ObjectId(req.params.id) })
         .lookup({
@@ -478,7 +478,7 @@ app.get('/simplex_api/sales/:id', (req, res) => {
         })
 });
 //insert
-app.post('/simplex_api/sales', (req, res) => {
+app.post('/api/sales', (req, res) => {
     Sale.create({
         recipient: req.body.recipient,
         product_id: req.body.product_id,
@@ -507,7 +507,7 @@ app.post('/simplex_api/sales', (req, res) => {
     });
 });
 //update
-app.put('/simplex_api/sales/:id', (req, res) => {
+app.put('/api/sales/:id', (req, res) => {
     Sale.findById(req.params.id, (err, sale) => {
         sale.update(req.query, (err, sales) => {
             if (err)
@@ -521,7 +521,7 @@ app.put('/simplex_api/sales/:id', (req, res) => {
     });
 });
 //delete
-app.delete('/simplex_api/sales/:id', (req, res) => {
+app.delete('/api/sales/:id', (req, res) => {
     Sale.remove({
         _id: req.params.id
     }, (err, sales) => {
@@ -539,7 +539,7 @@ app.delete('/simplex_api/sales/:id', (req, res) => {
 
 //EXPENSES
 //get all
-app.get('/simplex_api/expenses', (req, res) => {
+app.get('/api/expenses', (req, res) => {
 
     Expense.aggregate()
         .lookup({
@@ -559,7 +559,7 @@ app.get('/simplex_api/expenses', (req, res) => {
         })
 });
 //get One
-app.get('/simplex_api/expenses/:id', (req, res) => {
+app.get('/api/expenses/:id', (req, res) => {
     Expense.aggregate()
         .match({ _id: mongoose.Types.ObjectId(req.params.id) })
         .lookup({
@@ -580,7 +580,7 @@ app.get('/simplex_api/expenses/:id', (req, res) => {
         })
 });
 //insert
-app.post('/simplex_api/expenses', (req, res) => {
+app.post('/api/expenses', (req, res) => {
     Expense.create({
         product_id: req.body.product_id,
         quantity: req.body.quantity,
@@ -603,7 +603,7 @@ app.post('/simplex_api/expenses', (req, res) => {
     });
 });
 //update
-app.put('/simplex_api/expenses/:id', (req, res) => {
+app.put('/api/expenses/:id', (req, res) => {
     Expense.findById(req.params.id, (err, expense) => {
         expense.update(req.query, (err, expenses) => {
             if (err)
@@ -617,7 +617,7 @@ app.put('/simplex_api/expenses/:id', (req, res) => {
     });
 });
 //delete
-app.delete('/simplex_api/expenses/:id', (req, res) => {
+app.delete('/api/expenses/:id', (req, res) => {
     Expense.remove({
         _id: req.params.id
     }, (err, expenses) => {
@@ -634,7 +634,7 @@ app.delete('/simplex_api/expenses/:id', (req, res) => {
 
 //SUPPLIERS
 //get all
-app.get('/simplex_api/suppliers', (req, res) => {
+app.get('/api/suppliers', (req, res) => {
     Supplier.find((err, suppliers) => {
         if (err)
             console.log(err);
@@ -642,7 +642,7 @@ app.get('/simplex_api/suppliers', (req, res) => {
     });
 });
 //get One
-app.get('/simplex_api/suppliers/:id', (req, res) => {
+app.get('/api/suppliers/:id', (req, res) => {
     Supplier.findById(req.params.id, (err, suppliers) => {
         if (err)
             console.log(err);
@@ -650,7 +650,7 @@ app.get('/simplex_api/suppliers/:id', (req, res) => {
     });
 });
 //insert
-app.post('/simplex_api/suppliers', (req, res) => {
+app.post('/api/suppliers', (req, res) => {
     Supplier.create({
         names: req.body.names,
         address: req.body.address,
@@ -667,7 +667,7 @@ app.post('/simplex_api/suppliers', (req, res) => {
     });
 });
 //update
-app.put('/simplex_api/suppliers/:id', (req, res) => {
+app.put('/api/suppliers/:id', (req, res) => {
     Supplier.findById(req.params.id, (err, supplier) => {
         supplier.update(req.query, (err, suppliers) => {
             if (err)
@@ -681,7 +681,7 @@ app.put('/simplex_api/suppliers/:id', (req, res) => {
     });
 });
 //delete
-app.delete('/simplex_api/suppliers/:id', (req, res) => {
+app.delete('/api/suppliers/:id', (req, res) => {
     Supplier.remove({
         _id: req.params.id
     }, (err, suppliers) => {
@@ -698,7 +698,7 @@ app.delete('/simplex_api/suppliers/:id', (req, res) => {
 
 //CUSTOMERS
 //get all
-app.get('/simplex_api/customers', (req, res) => {
+app.get('/api/customers', (req, res) => {
     Customer.find((err, customers) => {
         if (err)
             console.log(err);
@@ -706,7 +706,7 @@ app.get('/simplex_api/customers', (req, res) => {
     });
 });
 //get One
-app.get('/simplex_api/customers/:id', (req, res) => {
+app.get('/api/customers/:id', (req, res) => {
     Customer.findById(req.params.id, (err, customers) => {
         if (err)
             console.log(err);
@@ -714,7 +714,7 @@ app.get('/simplex_api/customers/:id', (req, res) => {
     });
 });
 //insert
-app.post('/simplex_api/customers', (req, res) => {
+app.post('/api/customers', (req, res) => {
     Customer.create({
         names: req.body.names,
         address: req.body.address,
@@ -731,7 +731,7 @@ app.post('/simplex_api/customers', (req, res) => {
     });
 });
 //update
-app.put('/simplex_api/customers/:id', (req, res) => {
+app.put('/api/customers/:id', (req, res) => {
     Customer.findById(req.params.id, (err, customer) => {
         customer.update(req.query, (err, customers) => {
             if (err)
@@ -745,7 +745,7 @@ app.put('/simplex_api/customers/:id', (req, res) => {
     });
 });
 //delete
-app.delete('/simplex_api/customers/:id', (req, res) => {
+app.delete('/api/customers/:id', (req, res) => {
     Customer.remove({
         _id: req.params.id
     }, (err, customers) => {
@@ -761,7 +761,7 @@ app.delete('/simplex_api/customers/:id', (req, res) => {
 
 //USERS
 //get all
-app.get('/simplex_api/users', (req, res) => {
+app.get('/api/users', (req, res) => {
 
     User.aggregate()
         .lookup({
@@ -775,7 +775,7 @@ app.get('/simplex_api/users', (req, res) => {
         });
 });
 //get One
-app.get('/simplex_api/users/:id', (req, res) => {
+app.get('/api/users/:id', (req, res) => {
     User.aggregate()
         .match({ _id: mongoose.Types.ObjectId(req.params.id) })
         .lookup({
@@ -789,7 +789,7 @@ app.get('/simplex_api/users/:id', (req, res) => {
         });
 });
 //insert
-app.post('/simplex_api/users', (req, res) => {
+app.post('/api/users', (req, res) => {
     User.create({
         names: req.body.names,
         username: req.body.username,
@@ -807,7 +807,7 @@ app.post('/simplex_api/users', (req, res) => {
     });
 });
 //update
-app.put('/simplex_api/users/:id', (req, res) => {
+app.put('/api/users/:id', (req, res) => {
     User.findById(req.params.id, (err, user) => {
         user.update(req.query, (err, users) => {
             if (err)
@@ -821,7 +821,7 @@ app.put('/simplex_api/users/:id', (req, res) => {
     });
 });
 //delete
-app.delete('/simplex_api/users/:id', (req, res) => {
+app.delete('/api/users/:id', (req, res) => {
     User.remove({
         _id: req.params.id
     }, (err, users) => {
