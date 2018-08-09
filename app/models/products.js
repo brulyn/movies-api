@@ -14,7 +14,8 @@ const ProductSchema = new mongoose.Schema({
     purchasing_cost: { type: mongoose.SchemaTypes.Decimal128, default: 0 },
     exempted: { type:Boolean, default: false },
     stock_countdown: { type: mongoose.SchemaTypes.Number, default: 0 },
-    shop_id: mongoose.SchemaTypes.ObjectId
+    shop_id: mongoose.SchemaTypes.ObjectId,
+    shop_name: String
 });
 
 module.exports = mongoose.model('Product', ProductSchema);

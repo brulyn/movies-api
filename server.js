@@ -4,10 +4,12 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const sha1 = require('sha1');
 const app = express();
-
+const cors = require('cors');
 
 const mongoose = require('mongoose');
-mongoose.connect('mongodb://simplexUser:simplexPass123@localhost:27017/simplex');  // this is where you connect to your mlab database
+const db_url_online = 'mongodb://simplexUser:Simplex123@ds215961.mlab.com:15961/simplex';
+const db_url_local = 'mongodb://simplexUser:simplexPass123@localhost:27017/simplex';
+mongoose.connect(db_url_local);  // this is where you connect to your mlab database
 
 const Shop = require('./app/models/shops.js');
 const Store = require('./app/models/stores.js');
@@ -20,6 +22,13 @@ const Supplier = require('./app/models/suppliers.js');
 const Customer = require('./app/models/customers.js');
 const User = require('./app/models/users.js');
 
+app.use(function (req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
+
 app.use(bodyParser.urlencoded({ useNewUrlParser: true }));
 app.use(bodyParser.json());
 
@@ -27,12 +36,14 @@ app.listen(3000, () => {
     console.log('App Successful listening on port 3000');
 });
 
+
+
 //SHOPS
 //get all
 app.get('/simplex_api/shops', (req, res) => {
     Shop.find((err, shops) => {
         if (err)
-            console.log(handleError(err));
+            console.log(err);
         res.json(shops);
     });
 });
@@ -40,37 +51,37 @@ app.get('/simplex_api/shops', (req, res) => {
 app.get('/simplex_api/shops/:id', (req, res) => {
     Shop.findById(req.params.id, (err, shop) => {
         if (err)
-            console.log(handleError(err));
+            console.log(err);
         res.json(shop);
     });
 });
 //insert
 app.post('/simplex_api/shops', (req, res) => {
     Shop.create({
-        name: req.query.name,
-        address: req.query.address,
-        telephone: req.query.telephone,
-        manager: req.query.manager,
-        password: sha1(req.query.password),
+        name: req.body.name,
+        address: req.body.address,
+        telephone: req.body.telephone,
+        manager: req.body.manager,
+        password: sha1(req.body.password),
         date_subscribe: new Date(),
-        email: req.query.email,
-        currency: req.query.currency,
-        active: req.query.active,
-        trial: req.query.trial,
-        vat: req.query.vat,
-        unpaid: req.query.unpaid,
-        fixed_price: req.query.fixed_price,
-        user_view: req.query.user_view,
-        user_download: req.query.user_download,
-        user_add: req.query.user_add,
+        email: req.body.email,
+        currency: req.body.currency,
+        active: req.body.active,
+        trial: req.body.trial,
+        vat: req.body.vat,
+        unpaid: req.body.unpaid,
+        fixed_price: req.body.fixed_price,
+        user_view: req.body.user_view,
+        user_download: req.body.user_download,
+        user_add: req.body.user_add,
         type: shop_type,
-        store: req.query.store
+        store: req.body.store
     }, (err, shop) => {
         if (err)
-            console.log(handleError(err));
+            console.log(err);
         Shop.find((err, shops) => {
             if (err)
-                console.log(handleError(err));
+                console.log(err);
             res.json(shops);
 
         });
@@ -81,10 +92,10 @@ app.put('/simplex_api/shops/:id', (req, res) => {
     Shop.findById(req.params.id, (err, shop) => {
         shop.update(req.query, (err, shops) => {
             if (err)
-                console.log(handleError(err));
+                console.log(err);
             Shop.find((err, shops) => {
                 if (err)
-                    console.log(handleError(err));
+                    console.log(err);
                 res.json(shops);
             });
         });
@@ -96,10 +107,10 @@ app.delete('/simplex_api/shops/:id', (req, res) => {
         _id: req.params.id
     }, (err, shops) => {
         if (err)
-            console.log(handleError(err));
+            console.log(err);
         Shop.find((err, shops) => {
             if (err)
-                console.log(handleError(err));
+                console.log(err);
             res.json(shops);
         });
     });
@@ -108,48 +119,63 @@ app.delete('/simplex_api/shops/:id', (req, res) => {
 //STORES
 //get all
 app.get('/simplex_api/stores', (req, res) => {
-    Store.find((err, stores) => {
-        if (err)
-            console.log(handleError(err));
-        res.json(stores);
-    });
+    Store.aggregate()
+        .lookup({
+            from: 'shops',
+            localField: 'shop_id',
+            foreignField: '_id',
+            as: 'shop'
+        }).exec((err, store) => {
+            res.json(store);
+        })
 });
 //get One
 app.get('/simplex_api/stores/:id', (req, res) => {
-    Store.findById(req.params.id, (err, stores) => {
-        if (err)
-            console.log(handleError(err));
-        res.json(stores);
-    });
+    Store.aggregate()
+        .match({ _id: mongoose.Types.ObjectId(req.params.id) })
+        .lookup({
+            from: 'shops',
+            localField: 'shop_id',
+            foreignField: '_id',
+            as: 'shop'
+        })
+        .exec((err, store) => {
+            res.json(store);
+        })
 });
 //insert
 app.post('/simplex_api/stores', (req, res) => {
     Store.create({
-        name: req.query.name,
-        address: req.query.address,
-        telephone: req.query.telephone,
-        manager: req.query.manager,
-        shop_id: req.query.shop_id
+        name: req.body.name,
+        address: req.body.address,
+        telephone: req.body.telephone,
+        manager: req.body.manager,
+        shop_id: req.body.shop_id
     }, (err, store) => {
         if (err)
-            console.log(handleError(err));
-        Store.find((err, stores) => {
-            if (err)
-                console.log(handleError(err));
-            res.json(stores);
+            console.log(err);
+        else {
+            console.log(req);
+            Store.find((err, stores) => {
+                if (err)
+                    console.log(err);
+                res.json(stores);
 
-        });
+            });
+        }
+
     });
 });
 //update
 app.put('/simplex_api/stores/:id', (req, res) => {
+    console.log(req)
     Store.findById(req.params.id, (err, store) => {
         store.update(req.query, (err, stores) => {
             if (err)
-                console.log(handleError(err));
+                console.log(err);
             Store.find((err, stores) => {
                 if (err)
-                    console.log(handleError(err));
+                    console.log(err);
                 res.json(stores);
             });
         });
@@ -161,43 +187,57 @@ app.delete('/simplex_api/stores/:id', (req, res) => {
         _id: req.params.id
     }, (err, stores) => {
         if (err)
-            console.log(handleError(err));
-        Store.find((err, stores) => {
-            if (err)
-                console.log(handleError(err));
-            res.json(stores);
-        });
+            console.log(err);
+        else {
+            console.log(req);
+            Store.find((err, stores) => {
+                if (err)
+                    console.log(err);
+                res.json(stores);
+            });
+        }
+
     });
 });
 
 //CATEGORIES
 //get all
 app.get('/simplex_api/categories', (req, res) => {
-    Category.find((err, categories) => {
-        if (err)
-            console.log(handleError(err));
-        res.json(categories);
-    });
+    Category.aggregate()
+        .lookup({
+            from: 'shops',
+            localField: 'shop_id',
+            foreignField: '_id',
+            as: 'shop'
+        }).exec((err, category) => {
+            res.json(category);
+        });
 });
 //get One
 app.get('/simplex_api/categories/:id', (req, res) => {
-    Category.findById(req.params.id, (err, categories) => {
-        if (err)
-            console.log(handleError(err));
-        res.json(categories);
-    });
+    Category.aggregate()
+        .match({ _id: mongoose.Types.ObjectId(req.params.id) })
+        .lookup({
+            from: 'shops',
+            localField: 'shop_id',
+            foreignField: '_id',
+            as: 'shop'
+        })
+        .exec((err, category) => {
+            res.json(category);
+        });
 });
 //insert
 app.post('/simplex_api/categories', (req, res) => {
     Category.create({
-        name: req.query.name,
-        shop_id: req.query.shop_id
+        name: req.body.name,
+        shop_id: req.body.shop_id
     }, (err, category) => {
         if (err)
-            console.log(handleError(err));
+            console.log(err);
         Category.find((err, categories) => {
             if (err)
-                console.log(handleError(err));
+                console.log(err);
             res.json(categories);
         });
     });
@@ -207,10 +247,10 @@ app.put('/simplex_api/categories/:id', (req, res) => {
     Category.findById(req.params.id, (err, category) => {
         category.update(req.query, (err, categories) => {
             if (err)
-                console.log(handleError(err));
+                console.log(err);
             Category.find((err, categories) => {
                 if (err)
-                    console.log(handleError(err));
+                    console.log(err);
                 res.json(categories);
             });
         });
@@ -222,10 +262,10 @@ app.delete('/simplex_api/categories/:id', (req, res) => {
         _id: req.params.id
     }, (err, categories) => {
         if (err)
-            console.log(handleError(err));
+            console.log(err);
         Category.find((err, categories) => {
             if (err)
-                console.log(handleError(err));
+                console.log(err);
             res.json(categories);
         });
     });
@@ -234,31 +274,43 @@ app.delete('/simplex_api/categories/:id', (req, res) => {
 //SUBCATEGORIES
 //get all
 app.get('/simplex_api/subcategories', (req, res) => {
-    Subcategory.find((err, subcategories) => {
-        if (err)
-            console.log(handleError(err));
-        res.json(subcategories);
-    });
+    Subcategory.aggregate()
+        .lookup({
+            from: 'categories',
+            localField: 'category_id',
+            foreignField: '_id',
+            as: 'category'
+        })
+        .exec((err, subcategories) => {
+            res.json(subcategories)
+        })
 });
 //get One
 app.get('/simplex_api/subcategories/:id', (req, res) => {
-    Subcategory.findById(req.params.id, (err, subcategories) => {
-        if (err)
-            console.log(handleError(err));
-        res.json(subcategories);
-    });
+    Subcategory.aggregate()
+        .match({ _id: mongoose.Types.ObjectId(req.params.id) })
+        .lookup({
+            from: 'categories',
+            localField: 'category_id',
+            foreignField: '_id',
+            as: 'category'
+        })
+
+        .exec((err, subcategories) => {
+            res.json(subcategories)
+        })
 });
 //insert
 app.post('/simplex_api/subcategories', (req, res) => {
     Subcategory.create({
-        name: req.query.name,
-        shop_id: req.query.shop_id
+        name: req.body.name,
+        shop_id: req.body.shop_id
     }, (err, subcategory) => {
         if (err)
-            console.log(handleError(err));
+            console.log(err);
         Subcategory.find((err, subcategories) => {
             if (err)
-                console.log(handleError(err));
+                console.log(err);
             res.json(subcategories);
         });
     });
@@ -268,10 +320,10 @@ app.put('/simplex_api/subcategories/:id', (req, res) => {
     Subcategory.findById(req.params.id, (err, subcategory) => {
         subcategory.update(req.query, (err, subcategories) => {
             if (err)
-                console.log(handleError(err));
+                console.log(err);
             Subcategory.find((err, subcategories) => {
                 if (err)
-                    console.log(handleError(err));
+                    console.log(err);
                 res.json(subcategories);
             });
         });
@@ -283,10 +335,10 @@ app.delete('/simplex_api/subcategories/:id', (req, res) => {
         _id: req.params.id
     }, (err, subcategories) => {
         if (err)
-            console.log(handleError(err));
+            console.log(err);
         Subcategory.find((err, subcategories) => {
             if (err)
-                console.log(handleError(err));
+                console.log(err);
             res.json(subcategories);
         });
     });
@@ -296,31 +348,60 @@ app.delete('/simplex_api/subcategories/:id', (req, res) => {
 //PRODUCTS
 //get all
 app.get('/simplex_api/products', (req, res) => {
-    Product.find((err, products) => {
-        if (err)
-            console.log(handleError(err));
-        res.json(products);
-    });
+    Product.aggregate()
+        .lookup({
+            from: 'categories',
+            localField: 'category_id',
+            foreignField: '_id',
+            as: 'categories'
+        }).lookup({
+            from: 'subcategories',
+            localField: 'subcategory_id',
+            foreignField: '_id',
+            as: 'subcategories'
+        }).lookup({
+            from: 'shops',
+            localField: 'shop_id',
+            foreignField: '_id',
+            as: 'shops'
+        }).exec((err, pro) => {
+            res.json(pro);
+        });
 });
 //get One
 app.get('/simplex_api/products/:id', (req, res) => {
-    Product.findById(req.params.id, (err, products) => {
-        if (err)
-            console.log(handleError(err));
-        res.json(products);
-    });
+    Product.aggregate()
+        .match({ _id: mongoose.Types.ObjectId(req.params.id) })
+        .lookup({
+            from: 'categories',
+            localField: 'category_id',
+            foreignField: '_id',
+            as: 'categories'
+        }).lookup({
+            from: 'subcategories',
+            localField: 'subcategory_id',
+            foreignField: '_id',
+            as: 'subcategories'
+        }).lookup({
+            from: 'shops',
+            localField: 'shop_id',
+            foreignField: '_id',
+            as: 'shops'
+        }).exec((err, pro) => {
+            res.json(pro);
+        });
 });
 //insert
 app.post('/simplex_api/products', (req, res) => {
     Product.create({
-        name: req.query.name,
-        shop_id: req.query.shop_id
+        name: req.body.name,
+        shop_id: req.body.shop_id
     }, (err, product) => {
         if (err)
-            console.log(handleError(err));
+            console.log(err);
         Product.find((err, products) => {
             if (err)
-                console.log(handleError(err));
+                console.log(err);
             res.json(products);
         });
     });
@@ -330,10 +411,10 @@ app.put('/simplex_api/products/:id', (req, res) => {
     Product.findById(req.params.id, (err, product) => {
         product.update(req.query, (err, products) => {
             if (err)
-                console.log(handleError(err));
+                console.log(err);
             Product.find((err, products) => {
                 if (err)
-                    console.log(handleError(err));
+                    console.log(err);
                 res.json(products);
             });
         });
@@ -345,10 +426,10 @@ app.delete('/simplex_api/products/:id', (req, res) => {
         _id: req.params.id
     }, (err, products) => {
         if (err)
-            console.log(handleError(err));
+            console.log(err);
         Product.find((err, products) => {
             if (err)
-                console.log(handleError(err));
+                console.log(err);
             res.json(products);
         });
     });
@@ -358,45 +439,69 @@ app.delete('/simplex_api/products/:id', (req, res) => {
 //SALES
 //get all
 app.get('/simplex_api/sales', (req, res) => {
-    Sale.find((err, sales) => {
-        if (err)
-            console.log(handleError(err));
-        res.json(sales);
-    });
+    Sale.aggregate()
+        .lookup({
+            from: 'products',
+            localField: 'product_id',
+            foreignField: '_id',
+            as: 'product'
+        })
+        .lookup({
+            from: 'shops',
+            localField: 'shop_id',
+            foreignField: '_id',
+            as: 'shop'
+        })
+        .exec((err, sale) => {
+            res.json(sale);
+        })
 });
 //get One
 app.get('/simplex_api/sales/:id', (req, res) => {
-    Sale.findById(req.params.id, (err, sales) => {
-        if (err)
-            console.log(handleError(err));
-        res.json(sales);
-    });
+    Sale.aggregate()
+        .match({ _id: mongoose.Types.ObjectId(req.params.id) })
+        .lookup({
+            from: 'products',
+            localField: 'product_id',
+            foreignField: '_id',
+            as: 'product'
+        })
+        .lookup({
+            from: 'shops',
+            localField: 'shop_id',
+            foreignField: '_id',
+            as: 'shop'
+        })
+
+        .exec((err, sale) => {
+            res.json(sale);
+        })
 });
 //insert
 app.post('/simplex_api/sales', (req, res) => {
     Sale.create({
-        recipient: req.query.recipient,
-        product_id: req.query.product_id,
-        quantity: req.query.quantity,
-        total: req.query.total,
+        recipient: req.body.recipient,
+        product_id: req.body.product_id,
+        quantity: req.body.quantity,
+        total: req.body.total,
         sale_date: new Date(),
-        payment_type: req.query.payment_type,
-        vat: req.query.vat,
-        no_vat: req.query.no_vat,
-        nettotal: req.query.nettotal,
-        paid: req.query.paid,
-        due: req.query.due,
-        profit: req.query.profit,
-        employee_id: req.query.employee_id,
-        month_year: req.query.month_year,
-        shop_id: req.query.shop_id,
-        store_id: req.query.store_id
+        payment_type: req.body.payment_type,
+        vat: req.body.vat,
+        no_vat: req.body.no_vat,
+        nettotal: req.body.nettotal,
+        paid: req.body.paid,
+        due: req.body.due,
+        profit: req.body.profit,
+        employee_id: req.body.employee_id,
+        month_year: req.body.month_year,
+        shop_id: req.body.shop_id,
+        store_id: req.body.store_id
     }, (err, sale) => {
         if (err)
-            console.log(handleError(err));
+            console.log(err);
         Sale.find((err, sales) => {
             if (err)
-                console.log(handleError(err));
+                console.log(err);
             res.json(sales);
         });
     });
@@ -406,10 +511,10 @@ app.put('/simplex_api/sales/:id', (req, res) => {
     Sale.findById(req.params.id, (err, sale) => {
         sale.update(req.query, (err, sales) => {
             if (err)
-                console.log(handleError(err));
+                console.log(err);
             Sale.find((err, sales) => {
                 if (err)
-                    console.log(handleError(err));
+                    console.log(err);
                 res.json(sales);
             });
         });
@@ -421,10 +526,10 @@ app.delete('/simplex_api/sales/:id', (req, res) => {
         _id: req.params.id
     }, (err, sales) => {
         if (err)
-            console.log(handleError(err));
+            console.log(err);
         Sale.find((err, sales) => {
             if (err)
-                console.log(handleError(err));
+                console.log(err);
             res.json(sales);
         });
     });
@@ -435,39 +540,64 @@ app.delete('/simplex_api/sales/:id', (req, res) => {
 //EXPENSES
 //get all
 app.get('/simplex_api/expenses', (req, res) => {
-    Expense.find((err, expenses) => {
-        if (err)
-            console.log(handleError(err));
-        res.json(expenses);
-    });
+
+    Expense.aggregate()
+        .lookup({
+            from: 'products',
+            localField: 'product_id',
+            foreignField: '_id',
+            as: 'product'
+        })
+        .lookup({
+            from: 'store',
+            localField: 'store_id',
+            foreignField: '_id',
+            as: 'store'
+        })
+        .exec((err, expense) => {
+            res.json(expense);
+        })
 });
 //get One
 app.get('/simplex_api/expenses/:id', (req, res) => {
-    Expense.findById(req.params.id, (err, expenses) => {
-        if (err)
-            console.log(handleError(err));
-        res.json(expenses);
-    });
+    Expense.aggregate()
+        .match({ _id: mongoose.Types.ObjectId(req.params.id) })
+        .lookup({
+            from: 'products',
+            localField: 'product_id',
+            foreignField: '_id',
+            as: 'product'
+        })
+        .lookup({
+            from: 'store',
+            localField: 'store_id',
+            foreignField: '_id',
+            as: 'store'
+        })
+
+        .exec((err, expense) => {
+            res.json(expense);
+        })
 });
 //insert
 app.post('/simplex_api/expenses', (req, res) => {
     Expense.create({
-        product_id: req.query.product_id,
-        quantity: req.query.quantity,
-        total: req.query.total,
+        product_id: req.body.product_id,
+        quantity: req.body.quantity,
+        total: req.body.total,
         expense_date: new Date(),
-        employee_id: req.query.employee_id,
-        shop_id: req.query.shop_id,
-        store_id: req.query.store_id,
-        supplier_id: req.query.supplier_id,
-        cost: req.query.cost,
-        month_year: req.query.month_year
+        employee_id: req.body.employee_id,
+        shop_id: req.body.shop_id,
+        store_id: req.body.store_id,
+        supplier_id: req.body.supplier_id,
+        cost: req.body.cost,
+        month_year: req.body.month_year
     }, (err, expense) => {
         if (err)
-            console.log(handleError(err));
+            console.log(err);
         Expense.find((err, expenses) => {
             if (err)
-                console.log(handleError(err));
+                console.log(err);
             res.json(expenses);
         });
     });
@@ -477,10 +607,10 @@ app.put('/simplex_api/expenses/:id', (req, res) => {
     Expense.findById(req.params.id, (err, expense) => {
         expense.update(req.query, (err, expenses) => {
             if (err)
-                console.log(handleError(err));
+                console.log(err);
             Expense.find((err, expenses) => {
                 if (err)
-                    console.log(handleError(err));
+                    console.log(err);
                 res.json(expenses);
             });
         });
@@ -492,10 +622,10 @@ app.delete('/simplex_api/expenses/:id', (req, res) => {
         _id: req.params.id
     }, (err, expenses) => {
         if (err)
-            console.log(handleError(err));
+            console.log(err);
         Expense.find((err, expenses) => {
             if (err)
-                console.log(handleError(err));
+                console.log(err);
             res.json(expenses);
         });
     });
@@ -507,7 +637,7 @@ app.delete('/simplex_api/expenses/:id', (req, res) => {
 app.get('/simplex_api/suppliers', (req, res) => {
     Supplier.find((err, suppliers) => {
         if (err)
-            console.log(handleError(err));
+            console.log(err);
         res.json(suppliers);
     });
 });
@@ -515,23 +645,23 @@ app.get('/simplex_api/suppliers', (req, res) => {
 app.get('/simplex_api/suppliers/:id', (req, res) => {
     Supplier.findById(req.params.id, (err, suppliers) => {
         if (err)
-            console.log(handleError(err));
+            console.log(err);
         res.json(suppliers);
     });
 });
 //insert
 app.post('/simplex_api/suppliers', (req, res) => {
     Supplier.create({
-        names: req.query.names,
-        address: req.query.address,
-        email: req.query.email,
-        telephone: req.query.telephone
+        names: req.body.names,
+        address: req.body.address,
+        email: req.body.email,
+        telephone: req.body.telephone
     }, (err, supplier) => {
         if (err)
-            console.log(handleError(err));
+            console.log(err);
         Supplier.find((err, suppliers) => {
             if (err)
-                console.log(handleError(err));
+                console.log(err);
             res.json(suppliers);
         });
     });
@@ -541,10 +671,10 @@ app.put('/simplex_api/suppliers/:id', (req, res) => {
     Supplier.findById(req.params.id, (err, supplier) => {
         supplier.update(req.query, (err, suppliers) => {
             if (err)
-                console.log(handleError(err));
+                console.log(err);
             Supplier.find((err, suppliers) => {
                 if (err)
-                    console.log(handleError(err));
+                    console.log(err);
                 res.json(suppliers);
             });
         });
@@ -556,10 +686,10 @@ app.delete('/simplex_api/suppliers/:id', (req, res) => {
         _id: req.params.id
     }, (err, suppliers) => {
         if (err)
-            console.log(handleError(err));
+            console.log(err);
         Supplier.find((err, suppliers) => {
             if (err)
-                console.log(handleError(err));
+                console.log(err);
             res.json(suppliers);
         });
     });
@@ -571,7 +701,7 @@ app.delete('/simplex_api/suppliers/:id', (req, res) => {
 app.get('/simplex_api/customers', (req, res) => {
     Customer.find((err, customers) => {
         if (err)
-            console.log(handleError(err));
+            console.log(err);
         res.json(customers);
     });
 });
@@ -579,23 +709,23 @@ app.get('/simplex_api/customers', (req, res) => {
 app.get('/simplex_api/customers/:id', (req, res) => {
     Customer.findById(req.params.id, (err, customers) => {
         if (err)
-            console.log(handleError(err));
+            console.log(err);
         res.json(customers);
     });
 });
 //insert
 app.post('/simplex_api/customers', (req, res) => {
     Customer.create({
-        names: req.query.names,
-        address: req.query.address,
-        email: req.query.email,
-        telephone: req.query.telephone
+        names: req.body.names,
+        address: req.body.address,
+        email: req.body.email,
+        telephone: req.body.telephone
     }, (err, customer) => {
         if (err)
-            console.log(handleError(err));
+            console.log(err);
         Customer.find((err, customers) => {
             if (err)
-                console.log(handleError(err));
+                console.log(err);
             res.json(customers);
         });
     });
@@ -605,10 +735,10 @@ app.put('/simplex_api/customers/:id', (req, res) => {
     Customer.findById(req.params.id, (err, customer) => {
         customer.update(req.query, (err, customers) => {
             if (err)
-                console.log(handleError(err));
+                console.log(err);
             Customer.find((err, customers) => {
                 if (err)
-                    console.log(handleError(err));
+                    console.log(err);
                 res.json(customers);
             });
         });
@@ -620,10 +750,10 @@ app.delete('/simplex_api/customers/:id', (req, res) => {
         _id: req.params.id
     }, (err, customers) => {
         if (err)
-            console.log(handleError(err));
+            console.log(err);
         Customer.find((err, customers) => {
             if (err)
-                console.log(handleError(err));
+                console.log(err);
             res.json(customers);
         });
     });
@@ -632,34 +762,46 @@ app.delete('/simplex_api/customers/:id', (req, res) => {
 //USERS
 //get all
 app.get('/simplex_api/users', (req, res) => {
-    User.find((err, users) => {
-        if (err)
-            console.log(handleError(err));
-        res.json(users);
-    });
+
+    User.aggregate()
+        .lookup({
+            from: 'stores',
+            localField: 'store_id',
+            foreignField: '_id',
+            as: 'store'
+        })
+        .exec((err, user) => {
+            res.json(user);
+        });
 });
 //get One
 app.get('/simplex_api/users/:id', (req, res) => {
-    User.findById(req.params.id, (err, users) => {
-        if (err)
-            console.log(handleError(err));
-        res.json(users);
-    });
+    User.aggregate()
+        .match({ _id: mongoose.Types.ObjectId(req.params.id) })
+        .lookup({
+            from: 'stores',
+            localField: 'store_id',
+            foreignField: '_id',
+            as: 'store'
+        })
+        .exec((err, user) => {
+            res.json(user);
+        });
 });
 //insert
 app.post('/simplex_api/users', (req, res) => {
     User.create({
-        names: req.query.names,
-        username: req.query.username,
-        email: req.query.email,
-        password: sha1(req.query.password),
-        store_id: req.query.store_id
+        names: req.body.names,
+        username: req.body.username,
+        email: req.body.email,
+        password: sha1(req.body.password),
+        store_id: req.body.store_id
     }, (err, user) => {
         if (err)
-            console.log(handleError(err));
+            console.log(err);
         User.find((err, users) => {
             if (err)
-                console.log(handleError(err));
+                console.log(err);
             res.json(users);
         });
     });
@@ -669,10 +811,10 @@ app.put('/simplex_api/users/:id', (req, res) => {
     User.findById(req.params.id, (err, user) => {
         user.update(req.query, (err, users) => {
             if (err)
-                console.log(handleError(err));
+                console.log(err);
             User.find((err, users) => {
                 if (err)
-                    console.log(handleError(err));
+                    console.log(err);
                 res.json(users);
             });
         });
@@ -684,10 +826,10 @@ app.delete('/simplex_api/users/:id', (req, res) => {
         _id: req.params.id
     }, (err, users) => {
         if (err)
-            console.log(handleError(err));
+            console.log(err);
         User.find((err, users) => {
             if (err)
-                console.log(handleError(err));
+                console.log(err);
             res.json(users);
         });
     });
