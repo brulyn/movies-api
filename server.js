@@ -9,7 +9,7 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const db_url_online = 'mongodb://simplexUser:Simplex123@ds215961.mlab.com:15961/simplex';
 const db_url_local = 'mongodb://simplexUser:simplexPass123@localhost:27017/simplex';
-mongoose.connect(db_url_local);  // this is where you connect to your mlab database
+mongoose.connect(db_url_online);  // this is where you connect to your mlab database
 
 const Shop = require('./app/models/shops.js');
 const Store = require('./app/models/stores.js');
