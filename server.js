@@ -307,7 +307,7 @@ app.get("/api/subcategories/:id", (req, res) => {
 app.post("/api/subcategories", (req, res) => {
     Subcategory.create({
         name: req.body.name,
-        shop_id: req.body.shop_id
+        category_id: req.body.category
     }, (err, subcategory) => {
         if (err)
             console.log(err);
