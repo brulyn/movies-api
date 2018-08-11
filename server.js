@@ -193,11 +193,15 @@ app.delete("/api/stores/:id", (req, res) => {
             console.log(err);
         else {
             console.log(req);
-            Store.find((err, stores) => {
-                if (err)
-                    console.log(err);
-                res.json(stores);
-            });
+            Store.aggregate()
+                .lookup({
+                    from: "shops",
+                    localField: "shop_id",
+                    foreignField: "_id",
+                    as: "shop"
+                }).exec((err, store) => {
+                    res.json(store);
+                })
         }
 
     });
